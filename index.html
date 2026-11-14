@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TerraSleuth — Earth System Trend Detective</title>
+  <meta name="description" content="Space Apps compliant geospatial analytics detective application uncovering multi-decadal Earth system trends, regime shifts, and changepoints using NASA Earth observations and non-parametric statistical forensics.">
+  <meta name="theme-color" content="#0B1120">
+
+  <!-- Typography: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet.js CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="brand-container">
+      <div class="brand-emblem" title="TerraSleuth Telemetry Emblem">
+        <!-- Space Apps Compliant Custom Geometric Orbital Emblem -->
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3.6 9h16.8"/>
+          <path d="M3.6 15h16.8"/>
+          <ellipse cx="12" cy="12" rx="4" ry="9"/>
+          <circle cx="12" cy="12" r="2" fill="#38BDF8" stroke="none"/>
+        </svg>
+      </div>
+      <div class="brand-title-wrap">
+        <div class="brand-title">
+          TerraSleuth
+          <span class="brand-badge">Space Apps Forensics</span>
+        </div>
+        <div class="brand-subtitle">Earth System Trend Detective</div>
+      </div>
+    </div>
+
+    <!-- Header Actions & Navigation -->
+    <div class="header-actions">
+      <!-- Live NASA API Status Pill -->
+      <div class="live-status-pill" id="liveStatusContainer" title="NASA POWER API Endpoint Status">
+        <div class="status-dot" id="liveStatusDot"></div>
+        <span id="liveStatusText">NASA API: READY</span>
+      </div>
+
+      <!-- Investigation Wizard Modal Trigger -->
+      <button class="btn btn-primary" id="btnOpenWizard" title="Guided 3-Step Earth System Case Builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        <span>Investigation Wizard</span>
+      </button>
+
+      <!-- Compare Opposite Regions Toggle -->
+      <button class="btn btn-toggle" id="btnCompareToggle" title="Split-view dual comparative forensics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></svg>
+        <span>Compare Opposite Regions</span>
+      </button>
+
+      <!-- NASA Data Sources Modal Button -->
+      <button class="btn" id="btnOpenDataSources" title="View NASA Mission Citations & DOIs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span>Data Sources</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main 2-Column Responsive Layout -->
+  <main class="app-main">
+
+    <!-- Left Column (46%): Map, Case Files, Variables -->
+    <section class="left-panel">
+
+      <!-- Featured Case Files Strip -->
+      <div class="case-files-container">
+        <div class="case-files-header">
+          <div class="case-files-header-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span>Featured Case Files (NASA POWER Archive)</span>
+          </div>
+        </div>
+        <div class="case-pills-scroll" id="casePillsContainer">
+          <!-- Populated dynamically via DataLoader.CASE_FILES -->
+        </div>
+      </div>
+
+      <!-- Interactive Leaflet Map Card -->
+      <div class="card map-card">
+        <div class="map-card-toolbar">
+          <div class="map-hud">
+            <span>PIN:</span>
+            <div class="map-coord-badge" id="mapCurrentPin">80.00°N, 0.01°E</div>
+          </div>
+          <div class="map-hud">
+            <span>CURSOR:</span>
+            <span id="mapMouseCoord" style="color:var(--text-muted);">0.00°, 0.00°</span>
+          </div>
+        </div>
+
+        <!-- Leaflet Map Canvas Container -->
+        <div id="leafletMap"></div>
+
+        <div class="map-footer-hint">
+          <span>💡 Click anywhere on the map to glide and stream live 1985–2025 monthly NASA data</span>
+          <span style="font-family:var(--font-mono);font-size:0.68rem;opacity:0.75;">NASA POWER / MERRA-2 Native Grid</span>
+        </div>
+      </div>
+
+      <!-- Variable Selector & Forensic Controls -->
+      <div class="card variable-controls-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-title-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+            </div>
+            <div>
+              <div class="card-title">Observed Earth System Variable</div>
+              <div class="card-subtitle">Select parameter to run multi-decadal statistical forensics</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Variable Selection Pills -->
+        <div class="variables-strip" id="variablesStrip">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Variable Popover & NASA Mission Citation -->
+        <div class="var-explainer-box" id="varExplainerBox">
+          <div class="var-explainer-top">
+            <span class="var-explainer-name" id="varExplainerName">2m Air Temperature [°C]</span>
+            <span class="mission-badge" id="varExplainerMission">NASA MERRA-2 / POWER</span>
+          </div>
+          <p class="var-explainer-desc" id="varExplainerDesc">Near-surface ambient air temperature at 2 meters above ground level, derived from Goddard Earth Observing System (GEOS) atmospheric reanalysis model.</p>
+          <div class="var-explainer-role" id="varExplainerRole">
+            <strong>Earth System Forensic Role:</strong> Direct indicator of tropospheric warming, heatwave intensity, and surface energy balance.
+          </div>
+        </div>
+
+        <!-- Filter Bar: Deseasonalize & Time Window Controls -->
+        <div class="controls-filter-bar">
+          <!-- Deseasonalize Pill Toggle Switch -->
+          <div class="toggle-switch-container active" id="toggleDeseasonalize" title="Toggle 12-month rolling average to suppress annual solar cycle">
+            <div class="toggle-switch"></div>
+            <span class="toggle-label">Deseasonalize (12-Mo Rolling Avg)</span>
+          </div>
+
+          <!-- Time Range Chips -->
+          <div class="time-range-chips">
+            <button class="time-chip active" data-range="all">All (1985–2024)</button>
+            <button class="time-chip" data-range="1995-2024">1995–2024</button>
+            <button class="time-chip" data-range="2000-2024">2000–2024</button>
+            <button class="time-chip" data-range="last10">Last 10 Yrs</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Column (54%): Forensic Metrics, Verdict, Chart -->
+    <section class="right-panel">
+
+      <!-- Statistical Forensics Strip: 4 KPI Cards -->
+      <div class="forensics-kpi-grid">
+        <!-- KPI 1: Rate of Change / Decade -->
+        <div class="kpi-card kpi-coral">
+          <div class="kpi-label">
+            <span>Sen's Slope / Decade</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div class="kpi-value" id="kpiSlopeValue">+0.000 °C/dec</div>
+          <div class="kpi-subtext" id="kpiSlopeSub">OLS Slope: +0.000</div>
+        </div>
+
+        <!-- KPI 2: Mann-Kendall Trend Test -->
+        <div class="kpi-card kpi-emerald">
+          <div class="kpi-label">
+            <span>Mann-Kendall Test</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="kpi-value" id="kpiMKValue">p < 0.0001</div>
+          <div class="kpi-subtext" id="kpiMKSub">Z = 0.00 | S = 0</div>
+        </div>
+
+        <!-- KPI 3: 95% Confidence Interval -->
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span>95% Confidence Interval</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12H3"/><path d="M21 6H3"/><path d="M21 18H3"/></svg>
+          </div>
+          <div class="kpi-value" id="kpiCIValue">[0.00, 0.00]</div>
+          <div class="kpi-subtext" id="kpiCISub">Rank Limit Bounds</div>
+        </div>
+
+        <!-- KPI 4: Changepoint Year -->
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-label">
+            <span>Changepoint Year</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/></svg>
+          </div>
+          <div class="kpi-value" id="kpiCPValue">2005</div>
+          <div class="kpi-subtext" id="kpiCPSub">Pettitt's Rank Shift Δ</div>
+        </div>
+      </div>
+
+      <!-- Detective Verdict Card -->
+      <div class="card verdict-card verdict-significant" id="verdictCard">
+        <div class="verdict-top">
+          <div class="verdict-status-badge significant" id="verdictBadge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>STATISTICALLY SIGNIFICANT TREND DETECTED (p &lt; 0.05)</span>
+          </div>
+          <div class="verdict-confidence" id="verdictConfidence">
+            Forensic Certainty: <strong>99.98%</strong>
+          </div>
+        </div>
+        <div class="verdict-body" id="verdictBody">
+          Loading forensic evaluation...
+        </div>
+        <div class="verdict-ecological-box" id="verdictEcological">
+          <strong>Earth System Mechanism:</strong> Calculating biophysical driver...
+        </div>
+      </div>
+
+      <!-- Compare Mode Insights (Visible only in Compare Mode) -->
+      <div class="card compare-container" id="compareContainer">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-title-icon" style="background:rgba(129,140,248,0.15);color:#818CF8;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></svg>
+            </div>
+            <div>
+              <div class="card-title">Comparative Forensics: Divergent Earth System Dynamics</div>
+              <div class="card-subtitle">Examine how the same global forcing produces contrasting regional responses</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="compare-preset-bar">
+          <button class="compare-preset-btn active" data-pair="polar_asymmetry">Polar Asymmetry: High Arctic vs. Antarctica</button>
+          <button class="compare-preset-btn" data-pair="tropical_divergence">Tropical Divergence: Amazon Drying vs. Sahel Greening</button>
+        </div>
+
+        <div class="compare-insight-card" id="compareInsightCard">
+          Loading comparative analysis...
+        </div>
+      </div>
+
+      <!-- Interactive Time Series Chart Card -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="chartTitle">Time Series Telemetry</div>
+            <div class="card-subtitle" id="chartSubtitle">Observational Range: 1995–2024</div>
+          </div>
+          <div class="chart-header-actions">
+            <button class="btn" id="btnExportCSV" title="Export raw & deseasonalized points as CSV">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export CSV</span>
+            </button>
+            <button class="btn" id="btnExportPNG" title="Download publication-quality chart graphic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              <span>PNG Snapshot</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chart Canvas Wrapper -->
+        <div class="chart-wrapper">
+          <canvas id="timeSeriesChart"></canvas>
+        </div>
+
+        <!-- Custom Scientific Legend -->
+        <div class="chart-legend-custom">
+          <div class="legend-item">
+            <div class="legend-swatch swatch-raw"></div>
+            <span>Raw Monthly Observations</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch swatch-trend"></div>
+            <span>12-Month Rolling Trendline</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch swatch-sen"></div>
+            <span>Sen's Slope Trajectory</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch swatch-changepoint"></div>
+            <span>Pettitt Changepoint Break</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       MODAL 1: Investigation Wizard (3-Step Animated Flow)
+       ======================================================================== -->
+  <div class="modal-backdrop" id="wizardModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          <span>Investigation Wizard</span>
+        </div>
+        <button class="modal-close-btn" title="Close Wizard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- 3-Step Wizard Indicator -->
+        <div class="wizard-steps-indicator">
+          <div class="wizard-step-node active" id="stepNode1">
+            <div class="step-node-bubble">1</div>
+            <div class="step-node-label">Ecosystem</div>
+          </div>
+          <div class="wizard-step-node" id="stepNode2">
+            <div class="step-node-bubble">2</div>
+            <div class="step-node-label">Shift Type</div>
+          </div>
+          <div class="wizard-step-node" id="stepNode3">
+            <div class="step-node-bubble">3</div>
+            <div class="step-node-label">Confirm & Fly</div>
+          </div>
+        </div>
+
+        <!-- Step 1: Choose Ecosystem -->
+        <div class="wizard-step-content" id="wizardStep1" style="display:flex; flex-direction:column; gap:0.75rem;">
+          <p style="font-size:0.85rem;color:var(--text-secondary);">Select the Earth system biome or climate regime you wish to investigate:</p>
+          <div class="wizard-card-options" id="wizardStep1Options">
+            <!-- Dynamic options -->
+          </div>
+        </div>
+
+        <!-- Step 2: Choose Environmental Shift -->
+        <div class="wizard-step-content" id="wizardStep2" style="display:none; flex-direction:column; gap:0.75rem;">
+          <p style="font-size:0.85rem;color:var(--text-secondary);">Select the environmental shift or anomaly signal hypothesis:</p>
+          <div class="wizard-card-options" id="wizardStep2Options">
+            <!-- Dynamic options -->
+          </div>
+        </div>
+
+        <!-- Step 3: Confirmation Summary -->
+        <div class="wizard-step-content" id="wizardStep3" style="display:none; flex-direction:column; gap:0.75rem;">
+          <p style="font-size:0.85rem;color:var(--text-secondary);">Forensic Case Blueprint ready for deployment:</p>
+          <div id="wizardStep3Summary">
+            <!-- Summary populated by wizard -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" id="wizardBtnBack" style="display:none;">Back</button>
+        <button class="btn btn-primary" id="wizardBtnNext">Next Step &rarr;</button>
+        <button class="btn btn-primary" id="wizardBtnLaunch" style="display:none;">Launch Forensic Investigation &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 2: NASA Data Sources & Citations
+       ======================================================================== -->
+  <div class="modal-backdrop" id="sourcesModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span>NASA Missions & Data Sources Citations</span>
+        </div>
+        <button class="modal-close-btn" title="Close Sources Modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="font-size:0.82rem;line-height:1.6;color:var(--text-secondary);">
+        <p>TerraSleuth utilizes calibrated multi-decadal Earth observation data from NASA’s open-science repositories:</p>
+
+        <div style="display:flex;flex-direction:column;gap:1rem;margin-top:0.5rem;">
+          <div style="background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.85rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <strong style="color:#F8FAFC;">NASA POWER Project</strong>
+              <span class="mission-badge">NASA LaRC</span>
+            </div>
+            <p>Prediction Of Worldwide Energy Resources. Provides solar, meteorological, and hydrological parameters on a global 0.5° &times; 0.625° grid natively derived from MERRA-2 and CERES.</p>
+            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.35rem;">URL: https://power.larc.nasa.gov</div>
+          </div>
+
+          <div style="background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.85rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <strong style="color:#F8FAFC;">NASA MERRA-2</strong>
+              <span class="mission-badge">GMAO / GSFC</span>
+            </div>
+            <p>Modern-Era Retrospective analysis for Research and Applications, Version 2. Assimilates space-based observations of atmospheric state, aerosols, and land-surface processes into the GEOS-5 atmospheric model.</p>
+          </div>
+
+          <div style="background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.85rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <strong style="color:#F8FAFC;">NASA GPM (Global Precipitation Measurement)</strong>
+              <span class="mission-badge">NASA / JAXA</span>
+            </div>
+            <p>Provides dual-frequency precipitation radar and passive microwave radiometer retrievals incorporated into bias-corrected precipitation reanalysis.</p>
+          </div>
+
+          <div style="background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.85rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <strong style="color:#F8FAFC;">CERES, MODIS, OMI, AIRS & GLDAS</strong>
+              <span class="mission-badge">NASA Earth Observing System</span>
+            </div>
+            <p>Ancillary atmospheric composition, surface insolation, vegetation reflectance, and land assimilation modeling used for baseline validation.</p>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border-subtle);padding-top:0.75rem;margin-top:0.5rem;font-size:0.72rem;color:var(--text-muted);">
+          <strong>Disclaimer & Open Science Compliance:</strong> This application complies with Space Apps rules. NASA datasets are provided in the public domain for research and educational purposes.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 3: Custom CSV Drag & Drop Upload
+       ======================================================================== -->
+  <div class="modal-backdrop" id="uploadModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Upload Custom NASA / Sensor Dataset</span>
+        </div>
+        <button class="modal-close-btn" title="Close Upload Modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="dropzone" id="csvDropzone">
+          <div class="dropzone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.95rem;color:#F8FAFC;margin-bottom:0.25rem;">Drag & drop your CSV file here</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">or click to browse your computer</div>
+          </div>
+          <input type="file" id="csvFileInput" accept=".csv,.txt" style="display:none;">
+        </div>
+
+        <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">
+          <strong>Supported Formats:</strong>
+          <ul style="padding-left:1.2rem;margin-top:0.25rem;">
+            <li>Standard NASA POWER Monthly Point CSV export</li>
+            <li>NASA Giovanni / AppEEARS time series tabular CSV</li>
+            <li>Custom CSV with <code>Date</code> (or <code>Year</code>) and observation columns</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/forensics.js"></script>
+  <script src="js/data-loader.js"></script>
+  <script src="js/wizard.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
