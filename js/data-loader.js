@@ -331,6 +331,13 @@ const DataLoader = (() => {
    * Load local case file by relative path
    */
   async function loadCaseFile(caseFileObj) {
+    // If running under file:// protocol, directly use preloaded data to avoid browser CORS restriction
+    if (typeof PRELOADED_CASE_DATA !== 'undefined' && PRELOADED_CASE_DATA[caseFileObj.id]) {
+      if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
+        return JSON.parse(JSON.stringify(PRELOADED_CASE_DATA[caseFileObj.id]));
+      }
+    }
+
     try {
       const resp = await fetch(caseFileObj.filePath);
       if (!resp.ok) throw new Error(`HTTP ${resp.status} while fetching ${caseFileObj.filePath}`);
@@ -351,6 +358,10 @@ const DataLoader = (() => {
 
       return parsed;
     } catch (err) {
+      if (typeof PRELOADED_CASE_DATA !== 'undefined' && PRELOADED_CASE_DATA[caseFileObj.id]) {
+        console.warn('Local fetch failed, using preloaded case data fallback:', err.message);
+        return JSON.parse(JSON.stringify(PRELOADED_CASE_DATA[caseFileObj.id]));
+      }
       console.error('Failed to load case file:', caseFileObj.filePath, err);
       throw err;
     }
