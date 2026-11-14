@@ -272,7 +272,10 @@ const App = (() => {
     const roleEl = document.getElementById('varExplainerRole');
 
     if (nameEl) nameEl.textContent = `${meta.label} ${meta.unit ? `[${meta.unit}]` : ''}`;
-    if (badgeEl) badgeEl.textContent = meta.mission || 'NASA Mission Source';
+    if (badgeEl) {
+      badgeEl.textContent = meta.mission ? `${meta.mission} (0.5° × 0.625°)` : 'NASA Mission Source';
+      badgeEl.title = 'Data sourced from NASA POWER / MERRA-2 reanalysis model (0.5° × 0.625° spatial resolution, covering a ~50–70 km grid cell per point).';
+    }
     if (descEl) descEl.textContent = meta.description || '';
     if (roleEl) roleEl.innerHTML = `<strong>Earth System Forensic Role:</strong> ${meta.earthSystemRole || ''}`;
   }
@@ -441,6 +444,23 @@ const App = (() => {
 
     if (ecoEl) {
       ecoEl.innerHTML = `<strong>Earth System Mechanism:</strong> ${verdict.ecologicalContext}<br><span style="font-size:0.68rem;opacity:0.7;">${verdict.deseasonalizeNote}</span>`;
+    }
+
+    // Populate Featured Case File Detective Story Breakdown (Clue / Suspect / Why It Matters)
+    const storyBox = document.getElementById('caseDetectiveStory');
+    const clueEl = document.getElementById('storyClueContent');
+    const suspectEl = document.getElementById('storySuspectContent');
+    const whyEl = document.getElementById('storyWhyContent');
+
+    if (storyBox && clueEl && suspectEl && whyEl) {
+      if (dataset && dataset.detectiveStory) {
+        storyBox.style.display = 'flex';
+        clueEl.textContent = dataset.detectiveStory.clue;
+        suspectEl.textContent = dataset.detectiveStory.suspect;
+        whyEl.textContent = dataset.detectiveStory.whyItMatters;
+      } else {
+        storyBox.style.display = 'none';
+      }
     }
   }
 

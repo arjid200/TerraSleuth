@@ -891,6 +891,92 @@ html, body {
   line-height: 1.45;
 }
 
+/* Featured Case File Detective Story Breakdown */
+.case-detective-story {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.story-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.story-header-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+}
+
+.story-grid-badge {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.story-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.story-card {
+  background: rgba(11, 17, 32, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: border-color 0.2s ease;
+}
+
+.story-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.story-card-clue {
+  border-left: 3px solid var(--accent-cyan);
+}
+
+.story-card-suspect {
+  border-left: 3px solid var(--accent-coral);
+}
+
+.story-card-why {
+  border-left: 3px solid var(--accent-emerald);
+}
+
+.story-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.tag-clue { color: var(--accent-cyan); }
+.tag-suspect { color: var(--accent-coral); }
+.tag-why { color: var(--accent-emerald); }
+
+.story-content {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
 /* Time Series Chart Card */
 .chart-card {
   display: flex;

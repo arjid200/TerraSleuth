@@ -18,8 +18,8 @@ const DataLoader = (() => {
       label: '2m Air Temperature',
       unit: '°C',
       mission: 'NASA MERRA-2 / POWER',
-      missionDescription: 'Modern-Era Retrospective analysis for Research and Applications, Version 2 (GMAO / GSFC)',
-      description: 'Near-surface ambient air temperature at 2 meters above ground level, derived from Goddard Earth Observing System (GEOS) atmospheric reanalysis model with assimilated satellite radiances.',
+      missionDescription: 'Data sourced from NASA POWER / MERRA-2 reanalysis model (0.5° × 0.625° spatial resolution, covering a ~50–70 km grid cell per point).',
+      description: 'How warm the air is about 2 meters above the ground. A steady rise over decades signals a warming climate.',
       earthSystemRole: 'Direct indicator of tropospheric warming, heatwave intensity, and surface energy balance.'
     },
     'PRECTOTCORR': {
@@ -27,8 +27,8 @@ const DataLoader = (() => {
       label: 'Precipitation',
       unit: 'mm/day',
       mission: 'NASA MERRA-2 / GPM',
-      missionDescription: 'Global Precipitation Measurement & MERRA-2 Corrected Precipitation (GSFC)',
-      description: 'Bias-corrected total precipitation rate combining ground rain gauges, microwave radiometers, and NASA GPM dual-frequency radar.',
+      missionDescription: 'Data sourced from NASA POWER / MERRA-2 reanalysis model (0.5° × 0.625° spatial resolution, covering a ~50–70 km grid cell per point).',
+      description: 'The average amount of rain or snow falling per day. Changes can mean more droughts, floods, or shifting monsoons.',
       earthSystemRole: 'Governs freshwater budgets, agricultural viability, seasonal monsoons, and drought onset.'
     },
     'ALLSKY_SFC_SW_DWN': {
@@ -36,7 +36,7 @@ const DataLoader = (() => {
       label: 'Surface Solar Radiation',
       unit: 'MJ/m²/day',
       mission: 'NASA CERES / FLASHFlux',
-      missionDescription: 'Clouds and the Earth\'s Radiant Energy System (LaRC / GSFC)',
+      missionDescription: 'Data sourced from NASA POWER / MERRA-2 reanalysis model (0.5° × 0.625° spatial resolution, covering a ~50–70 km grid cell per point).',
       description: 'All-sky downward solar shortwave flux reaching the Earth surface, accounting for cloud optical thickness, aerosol scattering, and water vapor absorption.',
       earthSystemRole: 'Primary driver of photosynthesis, surface evaporation, and convective cloud formation.'
     },
@@ -45,7 +45,7 @@ const DataLoader = (() => {
       label: 'Relative Humidity',
       unit: '%',
       mission: 'NASA MERRA-2 / AIRS',
-      missionDescription: 'Atmospheric Infrared Sounder & MERRA-2 Boundary Layer (JPL / GSFC)',
+      missionDescription: 'Data sourced from NASA POWER / MERRA-2 reanalysis model (0.5° × 0.625° spatial resolution, covering a ~50–70 km grid cell per point).',
       description: 'Ratio of atmospheric water vapor pressure to saturation vapor pressure at 2 meters above surface level.',
       earthSystemRole: 'Regulates wildfire susceptibility, ecological transpiration stress, and convective thunderstorm potential.'
     }
@@ -56,7 +56,7 @@ const DataLoader = (() => {
     {
       id: 'amazon_manaus',
       name: 'Amazon Rainforest',
-      region: 'Manaus, Brazil',
+      region: 'Manaus, Brazil (003d10S_060d00W)',
       lat: -3.10,
       lon: -60.00,
       elevation: 51.4,
@@ -65,12 +65,17 @@ const DataLoader = (() => {
       defaultParam: 'T2M',
       oppositePairId: 'sahel_niamey',
       badge: 'Deforestation & Thermal Surge',
-      story: 'The Amazon basin has experienced recurring megadroughts (2005, 2010, 2015, and 2023–2024). Forensics reveal clear upward thermal trends paired with rainfall suppression.'
+      story: 'A hotter, drier Amazon stores less carbon and is more prone to fires.',
+      detectiveStory: {
+        clue: 'Temperature rose about 0.35°C per decade while rainfall fell about 0.5 mm/day per decade, and both trends are significant. The hottest year was 2024 (28.8°C) and the driest was 2015.',
+        suspect: 'Deforestation and drought linked to global warming and El Niño.',
+        whyItMatters: 'A hotter, drier Amazon stores less carbon and is more prone to fires.'
+      }
     },
     {
       id: 'arctic_fram',
-      name: 'High Arctic',
-      region: 'Fram Strait (80°N, 0°E)',
+      name: 'Arctic Ocean',
+      region: 'Fram Strait (080d00N_000d01E)',
       lat: 80.00,
       lon: 0.01,
       elevation: 0.0,
@@ -78,13 +83,18 @@ const DataLoader = (() => {
       category: 'Polar & Cryosphere',
       defaultParam: 'T2M',
       oppositePairId: 'antarctic_weddell',
-      badge: 'Arctic Amplification',
-      story: 'The Fram Strait is the primary deep-water gateway between the Arctic and Atlantic. Temperature records show extreme winter warming amplification driven by sea-ice loss and positive ice-albedo feedback.'
+      badge: 'Arctic Amplification & High Variance',
+      story: 'A critical lesson in scientific honesty—while the broader Arctic warms faster than the global average, a single grid point may not show statistical significance over a 30-year window.',
+      detectiveStory: {
+        clue: 'The temperature trend is upward (+0.16°C per decade) but not statistically significant here, because Arctic years vary widely (between -9.2°C and -5.1°C).',
+        suspect: 'High year-to-year variability is masking the long-term trend at this single grid point.',
+        whyItMatters: 'A critical lesson in scientific honesty—while the broader Arctic warms faster than the global average, a single grid point may not show statistical significance over a 30-year window.'
+      }
     },
     {
       id: 'monsoon_kochi',
-      name: 'Southwest Coast',
-      region: 'Kochi, Kerala, India',
+      name: 'Kochi, Kerala',
+      region: 'Southwest Coast (009d93N_076d27E)',
       lat: 9.93,
       lon: 76.27,
       elevation: 47.3,
@@ -92,8 +102,13 @@ const DataLoader = (() => {
       category: 'Monsoon Tropics',
       defaultParam: 'T2M',
       oppositePairId: 'amazon_manaus',
-      badge: 'Monsoon Heat & Flooding',
-      story: 'Stationed along the Arabian Sea and Western Ghats, this tropical maritime hub shows significant continuous warming alongside extreme episodic precipitation spikes (such as the historic 2018 deluge).'
+      badge: 'Monsoon Warming & Flood Risk',
+      story: 'Kochi is getting hotter while its monsoon remains unpredictable, raising heat stress and flood risk.',
+      detectiveStory: {
+        clue: 'Average temperature rose about 0.27°C per decade, a statistically significant trend, from about 27.1°C to 27.7°C (first vs. last 5 years).',
+        suspect: 'Regional warming and urban growth. Rainfall shows no clear trend, with a mean of about 7.2 mm/day and big swings from year to year.',
+        whyItMatters: 'Kochi is getting hotter while its monsoon remains unpredictable, raising heat stress and flood risk.'
+      }
     },
     {
       id: 'antarctic_weddell',
@@ -355,6 +370,7 @@ const DataLoader = (() => {
       parsed.story = caseFileObj.story;
       parsed.oppositePairId = caseFileObj.oppositePairId;
       parsed.badge = caseFileObj.badge;
+      parsed.detectiveStory = caseFileObj.detectiveStory;
 
       return parsed;
     } catch (err) {

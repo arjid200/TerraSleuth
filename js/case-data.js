@@ -5062,15 +5062,20 @@ const PRELOADED_CASE_DATA = {
     },
     "id": "amazon_manaus",
     "name": "Amazon Rainforest",
-    "region": "Manaus, Brazil",
+    "region": "Manaus, Brazil (003d10S_060d00W)",
     "category": "Tropical Rainforest / Drought",
-    "story": "The Amazon basin has experienced recurring megadroughts (2005, 2010, 2015, and 2023–2024). Forensics reveal clear upward thermal trends paired with rainfall suppression.",
+    "story": "A hotter, drier Amazon stores less carbon and is more prone to fires.",
     "oppositePairId": "sahel_niamey",
-    "badge": "Deforestation & Thermal Surge"
+    "badge": "Deforestation & Thermal Surge",
+    "detectiveStory": {
+      "clue": "Temperature rose about 0.35°C per decade while rainfall fell about 0.5 mm/day per decade, and both trends are significant. The hottest year was 2024 (28.8°C) and the driest was 2015.",
+      "suspect": "Deforestation and drought linked to global warming and El Niño.",
+      "whyItMatters": "A hotter, drier Amazon stores less carbon and is more prone to fires."
+    }
   },
   "arctic_fram": {
     "type": "power_csv",
-    "title": "High Arctic",
+    "title": "Arctic Ocean",
     "lat": 80,
     "lon": 0.01,
     "elevation": 0,
@@ -10129,16 +10134,21 @@ const PRELOADED_CASE_DATA = {
       ]
     },
     "id": "arctic_fram",
-    "name": "High Arctic",
-    "region": "Fram Strait (80°N, 0°E)",
+    "name": "Arctic Ocean",
+    "region": "Fram Strait (080d00N_000d01E)",
     "category": "Polar & Cryosphere",
-    "story": "The Fram Strait is the primary deep-water gateway between the Arctic and Atlantic. Temperature records show extreme winter warming amplification driven by sea-ice loss and positive ice-albedo feedback.",
+    "story": "A critical lesson in scientific honesty—while the broader Arctic warms faster than the global average, a single grid point may not show statistical significance over a 30-year window.",
     "oppositePairId": "antarctic_weddell",
-    "badge": "Arctic Amplification"
+    "badge": "Arctic Amplification & High Variance",
+    "detectiveStory": {
+      "clue": "The temperature trend is upward (+0.16°C per decade) but not statistically significant here, because Arctic years vary widely (between -9.2°C and -5.1°C).",
+      "suspect": "High year-to-year variability is masking the long-term trend at this single grid point.",
+      "whyItMatters": "A critical lesson in scientific honesty—while the broader Arctic warms faster than the global average, a single grid point may not show statistical significance over a 30-year window."
+    }
   },
   "monsoon_kochi": {
     "type": "power_csv",
-    "title": "Southwest Coast",
+    "title": "Kochi, Kerala",
     "lat": 9.93,
     "lon": 76.27,
     "elevation": 47.3,
@@ -15197,12 +15207,17 @@ const PRELOADED_CASE_DATA = {
       ]
     },
     "id": "monsoon_kochi",
-    "name": "Southwest Coast",
-    "region": "Kochi, Kerala, India",
+    "name": "Kochi, Kerala",
+    "region": "Southwest Coast (009d93N_076d27E)",
     "category": "Monsoon Tropics",
-    "story": "Stationed along the Arabian Sea and Western Ghats, this tropical maritime hub shows significant continuous warming alongside extreme episodic precipitation spikes (such as the historic 2018 deluge).",
+    "story": "Kochi is getting hotter while its monsoon remains unpredictable, raising heat stress and flood risk.",
     "oppositePairId": "amazon_manaus",
-    "badge": "Monsoon Heat & Flooding"
+    "badge": "Monsoon Warming & Flood Risk",
+    "detectiveStory": {
+      "clue": "Average temperature rose about 0.27°C per decade, a statistically significant trend, from about 27.1°C to 27.7°C (first vs. last 5 years).",
+      "suspect": "Regional warming and urban growth. Rainfall shows no clear trend, with a mean of about 7.2 mm/day and big swings from year to year.",
+      "whyItMatters": "Kochi is getting hotter while its monsoon remains unpredictable, raising heat stress and flood risk."
+    }
   },
   "antarctic_weddell": {
     "type": "power_csv",
@@ -25341,4 +25356,4 @@ const PRELOADED_CASE_DATA = {
     "badge": "Sahel Greening & Rain Rebound"
   }
 };
-if (typeof module !== "undefined" && module.exports) { module.exports = PRELOADED_CASE_DATA; }
+if (typeof module !== 'undefined' && module.exports) { module.exports = PRELOADED_CASE_DATA; }
