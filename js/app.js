@@ -35,6 +35,7 @@ const App = (() => {
     initChart();
     renderCaseFilePills();
     setupEventListeners();
+    setupMobileNav();
     setupModals();
     setupDropzone();
 
@@ -54,7 +55,8 @@ const App = (() => {
       minZoom: 1,
       maxZoom: 12,
       zoomControl: true,
-      attributionControl: false
+      attributionControl: false,
+      tap: false
     });
 
     // High-resolution scientific dark tiles: Esri World Dark Gray Canvas (100% free, no API key required)
@@ -324,6 +326,12 @@ const App = (() => {
 
     // Update Time Series Chart
     renderChart(forensics, meta, state.currentDataset);
+
+    // If on mobile/tablet and in explore view, signal to user that Forensics is updated
+    if (window.innerWidth < 1024) {
+      const updateDot = document.getElementById('navUpdateDot');
+      if (updateDot) updateDot.classList.add('active');
+    }
   }
 
   /**
@@ -523,10 +531,10 @@ const App = (() => {
             },
             ticks: {
               color: '#94A3B8',
-              font: { family: 'JetBrains Mono', size: 11 },
+              font: { family: 'JetBrains Mono', size: window.innerWidth < 600 ? 9 : 11 },
               maxRotation: 0,
               autoSkip: true,
-              maxTicksLimit: 10
+              maxTicksLimit: window.innerWidth < 600 ? 5 : 10
             }
           },
           y: {
@@ -1152,6 +1160,73 @@ const App = (() => {
     link.click();
     document.body.removeChild(link);
     showToast('Chart snapshot exported to PNG', 'success');
+  }
+
+  /**
+   * Mobile Segmented View Switcher (< 1024px)
+   */
+  function setupMobileNav() {
+    const appMain = document.getElementById('appMain');
+    const btnExplore = document.getElementById('btnNavExplore');
+    const btnForensics = document.getElementById('btnNavForensics');
+    const btnAll = document.getElementById('btnNavAll');
+    const jumpPill = document.getElementById('mobileJumpPill');
+    const updateDot = document.getElementById('navUpdateDot');
+
+    if (!appMain || !btnExplore || !btnForensics || !btnAll) return;
+
+    function setView(view) {
+      appMain.setAttribute('data-active-view', view);
+      document.body.classList.remove('view-explore', 'view-forensics', 'view-all');
+      document.body.classList.add(`view-${view}`);
+
+      [btnExplore, btnForensics, btnAll].forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+      });
+
+      if (view === 'forensics') {
+        if (updateDot) updateDot.classList.remove('active');
+        if (state.chart) {
+          setTimeout(() => state.chart.resize(), 60);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (view === 'explore') {
+        if (state.map) {
+          setTimeout(() => state.map.invalidateSize(), 60);
+        }
+      }
+    }
+
+    // Default to 'explore' on mobile / tablet screens (< 1024px)
+    if (window.innerWidth < 1024) {
+      setView('explore');
+    }
+
+    btnExplore.addEventListener('click', () => setView('explore'));
+    btnForensics.addEventListener('click', () => setView('forensics'));
+    btnAll.addEventListener('click', () => setView('all'));
+
+    if (jumpPill) {
+      jumpPill.addEventListener('click', () => {
+        setView('forensics');
+      });
+    }
+
+    // Dynamic resize handler between desktop and mobile modes
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        appMain.removeAttribute('data-active-view');
+        document.body.classList.remove('view-explore', 'view-forensics', 'view-all');
+      } else if (!appMain.hasAttribute('data-active-view')) {
+        setView('explore');
+      }
+
+      if (state.chart && state.chart.options.scales && state.chart.options.scales.x) {
+        state.chart.options.scales.x.ticks.maxTicksLimit = window.innerWidth < 600 ? 5 : 10;
+        state.chart.options.scales.x.ticks.font.size = window.innerWidth < 600 ? 9 : 11;
+        state.chart.update('none');
+      }
+    });
   }
 
   /**

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>TerraSleuth — Earth System Trend Detective</title>
   <meta name="description" content="Space Apps compliant geospatial analytics detective application uncovering multi-decadal Earth system trends, regime shifts, and changepoints using NASA Earth observations and non-parametric statistical forensics.">
   <meta name="theme-color" content="#0B1120">
@@ -49,33 +49,53 @@
     <!-- Header Actions & Navigation -->
     <div class="header-actions">
       <!-- Live NASA API Status Pill -->
-      <div class="live-status-pill" id="liveStatusContainer" title="NASA POWER API Endpoint Status">
+      <div class="live-status-pill" id="liveStatusContainer" title="NASA POWER API Endpoint Status: Ready (0.5° × 0.625° Grid)">
         <div class="status-dot" id="liveStatusDot"></div>
-        <span id="liveStatusText">NASA API: READY</span>
+        <span id="liveStatusText" class="live-status-text">NASA API: READY</span>
       </div>
 
       <!-- Investigation Wizard Modal Trigger -->
       <button class="btn btn-primary" id="btnOpenWizard" title="Guided 3-Step Earth System Case Builder">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-        <span>Investigation Wizard</span>
+        <span class="btn-text-desktop">Investigation Wizard</span>
+        <span class="btn-text-mobile">Wizard</span>
       </button>
 
       <!-- Compare Opposite Regions Toggle -->
       <button class="btn btn-toggle" id="btnCompareToggle" title="Split-view dual comparative forensics">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></svg>
-        <span>Compare Opposite Regions</span>
+        <span class="btn-text-desktop">Compare Opposite Regions</span>
+        <span class="btn-text-mobile">Compare</span>
       </button>
 
       <!-- NASA Data Sources Modal Button -->
       <button class="btn" id="btnOpenDataSources" title="View NASA Mission Citations & DOIs">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        <span>Data Sources</span>
+        <span class="btn-text-desktop">Data Sources</span>
+        <span class="btn-text-mobile">Sources</span>
       </button>
     </div>
   </header>
 
+  <!-- Mobile Segmented View Switcher (Visible on Tablets & Mobile Screens < 1024px) -->
+  <nav class="mobile-view-nav" id="mobileViewNav" aria-label="Mobile Navigation Switcher">
+    <button class="mobile-nav-btn active" id="btnNavExplore" data-view="explore">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><ellipse cx="12" cy="12" rx="4" ry="9"/></svg>
+      <span>Map &amp; Data</span>
+    </button>
+    <button class="mobile-nav-btn" id="btnNavForensics" data-view="forensics">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <span>Forensics &amp; Chart</span>
+      <span class="nav-update-dot" id="navUpdateDot"></span>
+    </button>
+    <button class="mobile-nav-btn" id="btnNavAll" data-view="all">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      <span>Full View</span>
+    </button>
+  </nav>
+
   <!-- Main 2-Column Responsive Layout -->
-  <main class="app-main">
+  <main class="app-main" id="appMain">
 
     <!-- Left Column (46%): Map, Case Files, Variables -->
     <section class="left-panel">
@@ -287,11 +307,13 @@
           <div class="chart-header-actions">
             <button class="btn" id="btnExportCSV" title="Export raw & deseasonalized points as CSV">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Export CSV</span>
+              <span class="btn-text-desktop">Export CSV</span>
+              <span class="btn-text-mobile">CSV</span>
             </button>
             <button class="btn" id="btnExportPNG" title="Download publication-quality chart graphic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-              <span>PNG Snapshot</span>
+              <span class="btn-text-desktop">PNG Snapshot</span>
+              <span class="btn-text-mobile">PNG</span>
             </button>
           </div>
         </div>
@@ -492,6 +514,12 @@
       </div>
     </div>
   </div>
+
+  <!-- Mobile Floating Jump Pill (Visible on mobile when exploring map) -->
+  <button class="mobile-jump-pill" id="mobileJumpPill" aria-label="Jump to Telemetry and Verdict">
+    <span id="mobileJumpText">📊 View Forensics &amp; Chart</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
 
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
